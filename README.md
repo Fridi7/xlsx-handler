@@ -8,5 +8,5 @@
 ### Usage
 get token available at http://localhost:1337/token/obtain/    
 send file - http://localhost:1337/upload/    
-    (for example, you can use the ![file](src/documents/example_of_removing_number_885.xlsx))     
+    (for example, you can use the <a href="src/documents/example_of_removing_number_885.xlsx">file</a>)     
 get task result - http://localhost:1337/tasks/<task_id>    
