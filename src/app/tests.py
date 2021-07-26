@@ -27,6 +27,7 @@ class AddTestCase(APITestCase):
         self.assertEquals(response.json()['token'], token_sign())
 
     def testNoError(self):
+        self.skipTest('WIP')
         url = reverse('upload')
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token_sign()}')
 

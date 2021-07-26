@@ -2,7 +2,7 @@ from celery import states
 from celery.result import AsyncResult
 from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from app import utils
 from app.models import XlsxFile
@@ -19,7 +19,7 @@ def get_token(request):
 @authentication_classes([utils.CustomTokenAuthentication])
 def upload(request):
     if "file" not in request.FILES:
-        return Response("Upload xlsx file", status=HTTP_400_BAD_REQUEST)
+        return Response("Upload xlsx file", HTTP_400_BAD_REQUEST)
 
     file = request.FILES['file']
 
@@ -27,7 +27,7 @@ def upload(request):
         return Response("Imported file is too large", HTTP_400_BAD_REQUEST)
 
     if file.content_type not in AVAILABLE_FILE_EXTENSIONS:
-        return Response("Upload xlsx file", status=HTTP_400_BAD_REQUEST)
+        return Response("Upload xlsx file", HTTP_400_BAD_REQUEST)
 
     instance = XlsxFile.objects.create(file=file, name=file.name)
 
@@ -42,12 +42,17 @@ def upload(request):
 @authentication_classes([utils.CustomTokenAuthentication])
 def get_status(request, task_id):
     task_result = AsyncResult(task_id)
-    instance = XlsxFile.objects.get(task_id=task_id)
-    result = {
-        'task_id': task_id,
-        'date_upload': instance.uploaded_at.replace(tzinfo=None),
-        'date_done': task_result.date_done,
-        'task_status': 'UPLOADED' if task_result.status == states.PENDING else task_result.status,
-        'task_result': task_result.result
-    }
-    return Response(result)
+
+    queryset = XlsxFile.objects.filter(task_id=task_id)
+    if queryset.exists() and task_result:
+        instance = queryset.last()
+        result = {
+            'task_id': task_id,
+            'date_upload': instance.uploaded_at.replace(tzinfo=None),
+            'date_done': task_result.date_done,
+            'task_status': 'UPLOADED' if task_result.status == states.PENDING else task_result.status,
+            'task_result': task_result.result
+        }
+        return Response(result)
+
+    return Response("Task or File object not found", HTTP_404_NOT_FOUND)

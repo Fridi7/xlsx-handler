@@ -13,5 +13,4 @@ tests/.coverage
 build/
 .idea
 venv/
-documents/
 db.sqlite3

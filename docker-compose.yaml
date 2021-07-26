@@ -1,11 +1,11 @@
-version: '3.7'
+version: '3.8'
 
 services:
   web:
     build: ./src
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./project:/usr/src/app/
+      - ./src:/usr/src/app/
     ports:
       - 1337:8000
     environment:
@@ -19,9 +19,9 @@ services:
 
   celery:
     build: ./src
-    command: celery worker --app=core --loglevel=info
+    command: celery -A app.celery worker --loglevel=info
     volumes:
-      - ./project:/usr/src/app
+      - ./src:/usr/src/app
     environment:
       - DEBUG=1
       - SECRET_KEY=dbaa1_i7%*3r9-=z-+_mz4r-!qeed@(-a_r(g@k8jo8y3r27%m
